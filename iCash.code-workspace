@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.pythonPath": "C:\\Users\\brand\\envs\\iCash\\Scripts\\python.exe",
+		"python.linting.pylintArgs": [
+			"----extension-pkg-whitelist=1xml"
+		]
+	}
+}
