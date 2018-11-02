@@ -1,0 +1,7 @@
+import pygame, engine
+
+pygame.font.init()
+
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+SCREEN_RESOLUTION = (SCREEN_WIDTH, SCREEN_HEIGHT)
