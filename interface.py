@@ -89,7 +89,9 @@ NO_BTN_TXT = "NO"
 class Display:
     """
     A class used to represent a game object that displays text
+    
     ...
+    
     Attributes
     ----------
     text : str
@@ -100,6 +102,7 @@ class Display:
         general area where the text will be displayed on-screen
     color : tuple
         RGB values of the color that the text will be displayed in
+    
     Methods
     -------
     get_font()
@@ -108,7 +111,7 @@ class Display:
     printable()
         Returns the Surface with the text to be displayed
     
-    get_position(position : str)
+    get_coordinates(pos : str)
         Returns the size and offset of the rendered text based on the specified position
     """    
 
@@ -149,7 +152,9 @@ class Display:
 class Button(Display):
     """
     A class inherited from Display that supports text rendering and a hover state
+    
     ...
+    
     Attributes
     ----------
     HOVER_STATE_INCREMENT : int
@@ -158,10 +163,13 @@ class Button(Display):
         text to be printed on the game screen
     size : int
         size of the text
-    color : list
-        RGB values of the color that the text will be displayed in
+    pos : str
+        general area where the text will be displayed
+    color : tuple
+        RGB values of the color in which the text will be displayed
     hover : boolean
         truth value of whether cursor is hovering over it or not
+    
     Methods
     -------
     get_font()
@@ -170,8 +178,11 @@ class Button(Display):
     printable()
         Returns the Surface with the text to be displayed
     
-    get_position(position : str)
+    get_coordinates(pos : str)
         Returns the size and offset of the rendered text based on the specified position
+    
+    is_colliding()
+        Returns the truth value of whether or not the coordinates given is colliding with the position of the object referenced
     """
 
     HOVER_STATE_INCREMENT = 5
@@ -189,6 +200,33 @@ class Button(Display):
         return self.get_coordinates().collidepoint(obj_pos)
 
 class Select(Button):
+    """
+    A class inherited from Button which specifies user selection
+    
+    ...
+    
+    Attributes
+    ----------
+    size : int
+        size of the text
+    pos : str
+        general area where the text will be displayed
+    color : tuple
+        RGB values of the color in which the text will be displayed
+    hover : boolean
+        truth value of whether the cursor is hovered over the choice or not
+    choices : list
+        list containing the strings of available selections
+    
+    Methods
+    -------
+    change_text()
+        Traverses through the list of choices
+    
+    printable()
+        Returns the Surface with the text to be displayed
+    """
+    
     def __init__(self, choices, size, pos, color=GREEN, hover=False):
         self.choices = choices
         self.index = 0
@@ -206,6 +244,36 @@ class Select(Button):
         return self.get_font().render(self.text, True, self.color)
 
 class Input(Display):
+    """
+    A class inherited from Display which takes user input
+    
+    ...
+    
+    Attributes
+    ----------
+    size : int
+        size of the text
+    pos : str
+        general area where the text will be displayed
+    text : str
+        text to be printed on the game screen
+    color : tuple
+        RGB values of the color in which the text will be displayed
+    char : str
+        string of user input
+    
+    Methods
+    -------
+    add_input()
+        Adds an inputted string char to text string
+    
+    backspace()
+        Removes the last character in the text string
+    
+    reset_input()
+        Resets text into an empty string
+    """
+    
     def __init__(self, size, pos, text="", color=GREEN):
         super().__init__(text, size, pos, color)
     
@@ -238,18 +306,22 @@ SET_TIMER_HELP_2 = Display(SET_TIMER_HELP_TXT_2, SMALL_SIZE, HELP_POS_2)
 
 ## Used in Scene "PLAY"
 def display_char_seq(char_seq, game_screen):
+    # Displays a letter sequence which the user has to unscramble
     char_seq_display = Display(char_seq, MEDIUM_SIZE, CHAR_SEQ_DISPLAY_POS)
     game_screen.blit(char_seq_display.printable(), char_seq_display.get_coordinates())
 
 def display_score(score, game_screen):
+    # Displays the current score of the user
     score_display = Display("$" + str(score), MEDIUM_SIZE, SCORE_DISPLAY_POS)
     game_screen.blit(score_display.printable(), score_display.get_coordinates())
 
 def display_retries(retries, game_screen):
+    # Displays the number of current available retries of the user
     retries_display = Display(str(retries) + "X", MEDIUM_SIZE, RETRIES_DISPLAY_POS)
     game_screen.blit(retries_display.printable(), retries_display.get_coordinates())
 
 def display_time(time, game_screen):
+    # Displays the running time during the game
     time_display = Display(time, MEDIUM_SIZE, TIME_DISPLAY_POS)
     game_screen.blit(time_display.printable(), time_display.get_coordinates())
 
@@ -259,6 +331,7 @@ PLAYER_INPUT = Input(INPUT_SIZE, PLAYER_INPUT_POS)
 GAME_OVER_DISPLAY = Display(GAME_OVER_DISPLAY_TXT, GAME_OVER_SIZE, GAME_OVER_DISPLAY_POS)
 
 def display_final_score(final_score, game_screen):
+    # Displays the final score of the user
     if not final_score:
         final_score_display = Display(NO_MONEY_TXT, FINAL_SCORE_SIZE, FINAL_SCORE_POS)
     else:
