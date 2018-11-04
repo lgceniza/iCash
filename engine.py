@@ -23,12 +23,24 @@ MAX_WORD_LIST_LENGTH = 3
 
 def get_word_list(file_path=FILE_PATH_TO_WORD_LIST):
     file = open(file_path)
-    words = [line.replace("\n", "") for line in file if (len(line) <= MAX_WORD_LENGTH) and ("!" not in line) and ("%" not in line)]
+    words = []
+    for line in file:
+        line = line.replace("\n", "")
+        if "!" in line:
+            line = line.replace("!", "")
+        if "%" in line:
+            line = line.replace("%", "")
+        if len(line) <= MAX_WORD_LENGTH:
+            words.append(line)
     file.close()
     return words
 
-def pick_word(word_list=get_word_list()):
-    word = random.choice(word_list)
+def pick_word(game_state, word_list=get_word_list()):
+    while True:
+        word = random.choice(word_list)
+        if word not in game_state["used_words"]:
+            game_state["used_words"].append(word)
+            break
     return word
 
 def pick_set_of_words(no_of_words=MAX_WORD_LIST_LENGTH, word_list=get_word_list()):
@@ -117,3 +129,9 @@ def create_or_load_save_file(file_path=FILE_PATH_TO_SAVE_FILE):
     game_state = SAVE_STATE
     save_to_file(game_state, file_path)
     return game_state
+
+def get_time(seconds):
+    if seconds % 60 > 9:
+        return str(seconds // 60) + ":" + str(seconds % 60)
+    else:
+        return str(seconds // 60) + ":0" + str(seconds % 60)

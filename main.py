@@ -4,7 +4,11 @@ pygame.init()
 
 game_screen = pygame.display.set_mode(interface.SCREEN_RESOLUTION)
 pygame.display.set_caption(interface.GAME_TITLE)
+clock = pygame.time.Clock()
 game_state = engine.create_or_load_save_file()
+
+passed_time = 0
+timer_started = False
 
 game_has_ended = False
 while not game_has_ended:
@@ -42,11 +46,17 @@ while not game_has_ended:
         elif event.type == pygame.KEYUP:
             if game_state["scene"] == interface.SET_TIMER:
                 if event.key == pygame.K_RETURN:
+                    set_timer_txt = interface.SET_TIMER_SELECT.text
+                    if set_timer_txt == "NO TIME":
+                        game_state["with_timer"] = False
+                    else:
+                        game_state["with_timer"] = True
+                        game_state["time_left"] = 60*int(interface.SET_TIMER_SELECT.text[:2])
                     if game_state["mode"] == interface.RANDOM_WORDS:
                         game_state["char_seq"] = engine.combine_words(engine.pick_set_of_words())
                         game_state["valid_words"] = engine.get_valid_words_from_seq(game_state["char_seq"])
                     elif game_state["mode"] == interface.ANAGRAMS:
-                        game_state["char_seq"] = engine.pick_word()
+                        game_state["char_seq"] = engine.pick_word(game_state)
                         game_state["valid_words"] = engine.get_anagrams_for_word(game_state["char_seq"])
                     game_state["scene"] = interface.PLAY
             elif game_state["scene"] == interface.PLAY:
@@ -60,18 +70,22 @@ while not game_has_ended:
                     if input_txt in game_state["valid_words"]:
                         game_state["score"] += engine.get_score_equivalent_of_word(input_txt)
                         game_state["valid_words"].remove(input_txt)
+                        game_state["used_words"].append(input_txt)
                         if game_state["valid_words"] == []:
                             if game_state["mode"] == interface.RANDOM_WORDS:
                                 game_state["char_seq"] = engine.combine_words(engine.pick_set_of_words())
                                 game_state["valid_words"] = engine.get_valid_words_from_seq(game_state["char_seq"])
                             else:
-                                game_state["char_seq"] = engine.pick_word()
+                                game_state["char_seq"] = engine.pick_word(game_state)
                                 game_state["valid_words"] = engine.get_anagrams_for_word(game_state["char_seq"])
                     else:
                         game_state["retries"] -= 1
                     interface.PLAYER_INPUT.reset_input()
                     if not game_state["retries"]:
                         game_state["scene"] = interface.GAME_OVER
+            elif game_state["scene"] == interface.GAME_OVER:
+                if event.key == pygame.K_n:
+                    game_state["scene"] = interface.MODES
 
     if game_state["scene"] == interface.START:
         game_screen.blit(interface.TITLE.printable(), interface.TITLE.get_coordinates())
@@ -94,12 +108,24 @@ while not game_has_ended:
         game_screen.blit(interface.SET_TIMER_SELECT.printable(), set_timer_select_pos)
         game_screen.blit(interface.SET_TIMER_HELP_2.printable(), interface.SET_TIMER_HELP_2.get_coordinates())
     elif game_state["scene"] == interface.PLAY:
+        if game_state["with_timer"]:
+            interface.display_time(engine.get_time(game_state["time_left"]), game_screen)
+            if not timer_started:
+                timer_started = not timer_started
+                start_time = pygame.time.get_ticks()
+            if pygame.time.get_ticks() - start_time >= 1000:
+                game_state["time_left"] -= 1
+                interface.display_time(engine.get_time(game_state["time_left"]), game_screen)
+                start_time = pygame.time.get_ticks()
+                if not game_state["time_left"]:
+                    game_state["scene"] = interface.GAME_OVER
         interface.display_char_seq(game_state["char_seq"], game_screen)
         game_screen.blit(interface.PLAYER_INPUT.printable(), interface.PLAYER_INPUT.get_coordinates(interface.INPUT_OFFSET))
         interface.display_score(game_state["score"], game_screen)
         interface.display_retries(game_state["retries"], game_screen)
     elif game_state["scene"] == interface.GAME_OVER:
-        game_screen.blit(interface.GAME_OVER.printable(), interface.GAME_OVER.get_coordinates())
+        game_screen.blit(interface.NEW_GAME.printable(), interface.NEW_GAME.get_coordinates())
+        game_screen.blit(interface.GAME_OVER_DISPLAY.printable(), interface.GAME_OVER_DISPLAY.get_coordinates())
         interface.display_final_score(game_state["score"], game_screen)
         game_screen.blit(interface.EXIT_GAME.printable(), interface.EXIT_GAME.get_coordinates())
     elif game_state["scene"] == interface.SAVE:
@@ -112,5 +138,6 @@ while not game_has_ended:
         game_screen.blit(interface.NO_BTN.printable(), no_btn_pos)
 
     pygame.display.update()
+    clock.tick(30)
 
 pygame.quit()

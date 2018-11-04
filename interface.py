@@ -59,7 +59,9 @@ CHAR_SEQ_DISPLAY_POS = "UPPER_HALF"
 PLAYER_INPUT_POS = "LOWER_HALF"
 SCORE_DISPLAY_POS = "LOWER_MIDDLE"
 RETRIES_DISPLAY_POS = "UPPER_RIGHT"
-GAME_OVER_POS = "UPPER_HALF"
+TIME_DISPLAY_POS = "UPPER_MIDDLE"
+NEW_GAME_POS = "UPPER_MIDDLE"
+GAME_OVER_DISPLAY_POS = "UPPER_HALF"
 FINAL_SCORE_POS = "LOWER_HALF"
 EXIT_GAME_POS = "LOWER_MIDDLE"
 SAVE_STATE_POS = "CENTER"
@@ -73,9 +75,10 @@ RND_WRDS_BTN_TXT = "RANDOM WORDS"
 DIVIDER_TXT = "---------------"
 ANAGRAM_BTN_TXT = "ANAGRAMS"
 SET_TIMER_HELP_TXT_1 = "CLICK TO CHANGE."
-SET_TIMER_SELECT_TXT = ["UNLI", "1 MIN.", "2 MIN.", "3 MIN.", "4 MIN.", "5 MIN."]
+SET_TIMER_SELECT_TXT = ["NO TIME", "1 MIN.", "3 MIN.", "5 MIN.", "7 MIN.", "10 MIN."]
 SET_TIMER_HELP_TXT_2 = "PRESS [ENTER] TO CONFIRM."
-GAME_OVER_TXT = "GAME OVER"
+NEW_GAME_TXT = "PRESS [N] FOR NEW GAME."
+GAME_OVER_DISPLAY_TXT = "GAME OVER"
 FINAL_SCORE_TXT = "YOU SCORED "
 NO_MONEY_TXT = "YOU GOT NOTHING!"
 EXIT_GAME_TXT = "CLICK TO EXIT GAME."
@@ -86,9 +89,7 @@ NO_BTN_TXT = "NO"
 class Display:
     """
     A class used to represent a game object that displays text
-
     ...
-
     Attributes
     ----------
     text : str
@@ -99,7 +100,6 @@ class Display:
         general area where the text will be displayed on-screen
     color : tuple
         RGB values of the color that the text will be displayed in
-
     Methods
     -------
     get_font()
@@ -149,9 +149,7 @@ class Display:
 class Button(Display):
     """
     A class inherited from Display that supports text rendering and a hover state
-
     ...
-
     Attributes
     ----------
     HOVER_STATE_INCREMENT : int
@@ -164,7 +162,6 @@ class Button(Display):
         RGB values of the color that the text will be displayed in
     hover : boolean
         truth value of whether cursor is hovering over it or not
-
     Methods
     -------
     get_font()
@@ -195,16 +192,18 @@ class Select(Button):
     def __init__(self, choices, size, pos, color=GREEN, hover=False):
         self.choices = choices
         self.index = 0
-        super().__init__(self.choices[self.index], size, pos, color)
+        self.text = self.choices[self.index]
+        super().__init__(self.text, size, pos, color)
 
     def change_text(self):
         if self.index < len(self.choices) - 1:
             self.index += 1
         else:
             self.index = 0
+        self.text = self.choices[self.index]
 
     def printable(self):
-        return self.get_font().render(self.choices[self.index], True, self.color)
+        return self.get_font().render(self.text, True, self.color)
 
 class Input(Display):
     def __init__(self, size, pos, text="", color=GREEN):
@@ -250,10 +249,14 @@ def display_retries(retries, game_screen):
     retries_display = Display(str(retries) + "X", MEDIUM_SIZE, RETRIES_DISPLAY_POS)
     game_screen.blit(retries_display.printable(), retries_display.get_coordinates())
 
+def display_time(time, game_screen):
+    time_display = Display(time, MEDIUM_SIZE, TIME_DISPLAY_POS)
+    game_screen.blit(time_display.printable(), time_display.get_coordinates())
+
 PLAYER_INPUT = Input(INPUT_SIZE, PLAYER_INPUT_POS)
 
 ## Used in Scene "GAME_OVER"
-GAME_OVER = Display(GAME_OVER_TXT, GAME_OVER_SIZE, GAME_OVER_POS)
+GAME_OVER_DISPLAY = Display(GAME_OVER_DISPLAY_TXT, GAME_OVER_SIZE, GAME_OVER_DISPLAY_POS)
 
 def display_final_score(final_score, game_screen):
     if not final_score:
@@ -262,6 +265,7 @@ def display_final_score(final_score, game_screen):
         final_score_display = Display(FINAL_SCORE_TXT + "$" + str(final_score) + ".", FINAL_SCORE_SIZE, FINAL_SCORE_POS)
     game_screen.blit(final_score_display.printable(), final_score_display.get_coordinates())
 
+NEW_GAME = Display(NEW_GAME_TXT, SMALL_SIZE, NEW_GAME_POS)
 EXIT_GAME = Display(EXIT_GAME_TXT, SMALL_SIZE, EXIT_GAME_POS)
 
 ## Used in Scene "SAVE"
