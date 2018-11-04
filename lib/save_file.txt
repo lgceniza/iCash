@@ -1,0 +1,9 @@
+scene=START
+mode=None
+with_timer=None
+time_left=None
+char_seq=None
+retries=3
+score=0
+valid_words=None
+used_words=[]
